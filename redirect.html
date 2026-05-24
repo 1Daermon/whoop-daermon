@@ -1,15 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WHOOP OAuth Redirect</title>
+  <title>WHOOP Authorization</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; text-align: center; }
+    #code-box {
+      font-size: 14px; font-family: monospace;
+      background: #f0f4ff; border: 2px solid #4a86e8;
+      border-radius: 8px; padding: 16px; margin: 20px 0;
+      word-break: break-all;
+    }
+    button {
+      background: #4a86e8; color: white; border: none;
+      padding: 10px 24px; font-size: 16px; border-radius: 6px; cursor: pointer;
+    }
+    button:hover { background: #2a66c8; }
+    #copied { color: green; margin-top: 8px; display: none; }
+    #error { color: red; }
+  </style>
 </head>
 <body>
-  <h1>WHOOP Authorization Complete</h1>
-
-  <p>You can close this window.</p>
+  <h2 id="title">WHOOP Authorization</h2>
+  <div id="content"></div>
 
   <script>
-    console.log(window.location.href);
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
+    const error  = params.get('error');
+    const content = document.getElementById('content');
+    const title   = document.getElementById('title');
+
+    if (error) {
+      title.textContent = 'Authorization Failed';
+      content.innerHTML = '<p id="error">Error: ' + error + '</p>';
+    } else if (code) {
+      title.textContent = '✓ Almost done!';
+      content.innerHTML =
+        '<p>Copy this code, then paste it into the Apps Script editor:</p>' +
+        '<div id="code-box">' + code + '</div>' +
+        '<button onclick="copyCode()">Copy Code</button>' +
+        '<p id="copied">Copied!</p>' +
+        '<p style="color:#888;font-size:13px;margin-top:24px">' +
+        'In Apps Script, add this line at the bottom and click Run:<br>' +
+        '<code>setAuthCode("' + code + '")</code></p>';
+    } else {
+      content.innerHTML = '<p>No authorization code found in URL.</p>';
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(code).then(function() {
+        document.getElementById('copied').style.display = 'block';
+      });
+    }
   </script>
 </body>
 </html>
